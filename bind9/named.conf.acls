@@ -1,0 +1,19 @@
+//
+// Access Control Lists
+//
+
+// ACL predeterminada para transferencia de zonas
+acl "xfer" {
+    none;
+};
+
+// ACL para servidores Esclavos
+//acl "esclavos" {
+//        192.168.1.253;
+//};
+
+// ACL para localhost y redes privadas
+acl "redes_privadas" {
+        localhost;
+        192.168.1.0/24;
+};

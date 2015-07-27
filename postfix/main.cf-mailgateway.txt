@@ -1,0 +1,191 @@
+#############################################################
+#############################################################
+############## CONFIGURACION POSTFIX ########################
+#############################################################
+#############################################################
+
+#############################################################
+######## PARAMETROS GENERALES ###############################
+#############################################################
+
+# Directorio en donde se encuentran los archivos README de Postfix
+# que describen como compilar, configurar y operar Postfix.       
+readme_directory = /usr/share/doc/postfix                         
+
+# Banner SMTP con el que se anunca el servidor
+smtpd_banner = $myhostname NO UCE ESMTP (GNU)                                                                                               
+
+# Limites para tamaño de mensaje (bytes)
+message_size_limit = 25971520         
+
+# Delimitador para extensiones de nombres de correo
+recipient_delimiter = +                            
+
+# Generar mensajes de alerta para el remitente (local) de que
+# su mensaje no ha podido ser entregado y todavía esta encolado.
+delay_warning_time = 4h
+
+# Alias para correo local(8)
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
+
+# No generar mensajes beep a cuentas de correo locales (unix)
+biff = no
+
+# Otras Configs
+#queue_minfree = 120000000
+
+#############################################################
+######## NOMBRES DE HOST Y DOMINIOS #########################
+#############################################################
+
+# Nombre del Host FQDN
+myhostname = mail.example.com
+# Nombre de dominio origen
+myorigin = example.com
+# Dominios locales en los que recibimos correo
+# No recibimos correo local                   
+mydestination =                                                                    
+
+#############################################################
+####### PARAMETROS DE RED y CONTROLES DE ACCESO ###############
+#############################################################  
+
+# Interfaces de red en las que escucha peticiones
+inet_interfaces = all
+# Redes locales
+mynetworks = 127.0.0.0/8
+
+#############################################################
+############### PARAMETROS DE SEGURIDAD #####################
+#############################################################
+
+############### PARAMETROS TLS/SSL ##########################
+
+# Parametros TLS del Servidor SMTP: smtpd(8).
+###smtpd_use_tls=yes                            
+###smtpd_tls_cert_file = /etc/postfix/ssl/mail.example.com.crt
+###smtpd_tls_key_file = /etc/postfix/ssl/mail.example.com.key 
+###smtpd_tls_CAfile = /etc/postfix/ssl/cacert.pem                 
+###smtpd_tls_loglevel = 1                                         
+###smtpd_tls_received_header = yes                                
+###smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+###smtpd_tls_session_cache_timeout = 3600s                                
+###smtpd_tls_auth_only = no                                               
+
+# Parametros TLS del Cliente SMTP: smtp(8).
+###smtp_use_tls = yes                         
+###smtp_tls_cert_file = /etc/postfix/ssl/mail.example.com.crt
+###smtp_tls_key_file = /etc/postfix/ssl/mail.example.com.key 
+###smtp_tls_CAfile = /etc/postfix/ssl/cacert.pem                 
+###smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+############### PARAMETROS SASL #############################
+
+# Parametros SASL del Servidor SMTP: smtpd(8).
+###smtpd_sasl_auth_enable = yes
+###smtpd_sasl_security_options = noanonymous
+###smtpd_sasl_local_domain =
+###smtpd_sasl_authenticated_header = yes
+###broken_sasl_auth_clients = no
+
+#############################################################
+####### PARAMETROS DE REGISTRO DE EVENTOS: LOGS #############
+#############################################################
+
+# Registrar todo tipo de eventos
+#notify_classes = delay, policy, protocol, resource, software
+#notify_classes = delay, resource, software                  
+
+#############################################################
+####### PARAMETROS DE RELAY Y TRANSPORTE ####################
+#############################################################
+
+# Recipientes y Transporte local
+# Lista de recipidntes locales y transporte desactivado
+local_recipient_maps =
+local_transport = error:local mail delivery is disabled
+
+# Mapa de alias virtuales para root, hostmaster, postmaster y abuse
+virtual_alias_maps = hash:/etc/postfix/virtual
+
+# Mapeo de transportes:
+# Los mapas de transportes definen un nombre de dominio
+# y su destino final, en este caso se envia el correo al
+# Servidor mailstore: pop.example.com
+#transport_maps = hash:/etc/postfix/transport
+
+# Mapeo para Relay de Dominios
+#relay_domains = $transport_maps
+
+# No permitir correo para user@cualquiercosa.example.com
+parent_domain_matches_subdomains =
+        debug_peer_list smtpd_access_maps
+
+# Mapeo para Relay de Recipientes
+#relay_recipient_maps = ldap:/etc/postfix/ldap_virtual_alias_maps.cf
+
+#############################################################
+############### RESTRICCIONES SMTPD #########################
+#############################################################
+
+#smtpd_delay_reject = no
+
+# Restricciones a Clientes SMTP (IP y Hostname)
+# Desactivado ya que se evalua en recipient restrictions
+#                                                       
+# smtpd_client_restrictions =
+
+# El servidor smtpd requiere que un helo
+smtpd_helo_required = yes
+
+# Restricciones a Sender SMTP
+# Desactivado ya que se evalua en recipient restrictions
+#                                                       
+# smtpd_sender_restrictions =
+
+# Desactivar pruebas de descubrimiento de cuentas
+disable_vrfy_command = yes
+
+# Restricciones Recipientes
+smtpd_recipient_restrictions =
+        permit_mynetworks,
+        permit_sasl_authenticated,
+        reject_invalid_hostname,
+        reject_non_fqdn_hostname,
+        reject_non_fqdn_sender,
+        reject_non_fqdn_recipient,
+        reject_unknown_sender_domain,
+        reject_unknown_recipient_domain,
+        reject_unauth_destination,
+        check_recipient_access pcre:/etc/postfix/recipient_checks.pcre,
+        check_helo_access hash:/etc/postfix/helo_checks,
+        check_sender_access hash:/etc/postfix/sender_checks,
+        check_client_access hash:/etc/postfix/client_checks,
+        reject_rbl_client cbl.abuseat.org,
+        #reject_rbl_client bl.spamcop.com,
+        #check_policy_service inet:127.0.0.1:10001
+        permit
+
+# Restricciones para etapa de revisión datos
+smtpd_data_restrictions =
+        reject_unauth_pipelining,
+        permit
+
+#############################################################
+############### FILTRO DE CONTENIDO #########################
+#############################################################
+
+# Todo correo que haya pasado las restricciones anteriores,
+# será enviado al filtro de contenido amavisd-new
+# Enviar al localhost
+#content_filter = smtp-amavis:[127.0.0.1]:10024
+
+#
+# Configuracion DKIM Milter
+#
+#smtpd_milters = inet:localhost:8891
+#non_smtpd_milters = inet:localhost:8891

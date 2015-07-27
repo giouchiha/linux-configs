@@ -1,0 +1,347 @@
+use strict;
+
+#
+# Place your configuration directives here.  They will override those in
+# earlier files.
+#
+# See /usr/share/doc/amavisd-new/ for documentation and examples of
+# the directives you can use in this file
+#
+
+###############################################################################
+###############################################################################
+############## CONFIGURACIÖN PERSONALIZADA AMVISD-NEW 2.x          ############
+###############################################################################
+###############################################################################
+
+###############################################################################
+### Configuraciones Globales
+###############################################################################
+
+# Numero de procesos hijos (pre-forked) de amavisd
+$max_servers = 4;
+
+###############################################################################
+### Configuraciones de nombre de Dominio y Hostname
+###############################################################################
+
+# Nombre del nodo amavisd-new
+$myhostname = 'smtp.example.com';
+
+# Nombre de dominio local
+$mydomain = 'example.com';
+
+# Lista de Dominios Locales, necesario para que amavisd agregue las cabeceras
+# de SpamAssassin de status y tests.
+@local_domains_acl = ( ".$mydomain" );
+
+###############################################################################
+### Configuraciones de Logs
+###############################################################################
+
+# Envia logs a syslogd (preferido)
+$DO_SYSLOG = 1;
+# Origen mostrado en los logs
+$syslog_ident = 'amavis';    # syslog ident tag, prepended to all messages
+# Facility para registrar eventos
+$syslog_facility = 'mail';
+# Nivel info para diagnosticos
+$syslog_priority = 'debug';
+#NOTE: levels are not strictly observed and are somewhat arbitrary
+# 0: startup/exit/failure messages, viruses detected
+# 1: args passed from client, some more interesting messages
+# 2: virus scanner output, timing
+# 3: server, client
+# 4: decompose parts
+# 5: more debug details
+$log_level = 2;           # (defaults to 0)
+
+###############################################################################
+### Configuraciones servicio SMTP Amavis
+###############################################################################
+
+$inet_socket_bind = '127.0.0.1';
+$inet_socket_port = 10024;
+
+###############################################################################
+### Configuraciones ACL del servicio SMTP Amavis
+###############################################################################
+
+# Permitir conexiones del localhost y del SMTP(127.0.0.1)
+@inet_acl   = qw( 127.0.0.1 [::1] );
+
+###############################################################################
+### Configuraciones entrega de correo del servicio SMTP Amavis
+###############################################################################
+
+# Enviar correo analizado al servidor 127.0.0.1:10025
+$forward_method = 'smtp:[127.0.0.1]:10025';
+# Enviar notificaciones al mismo servidor definido en $forward_method
+$notify_method = $forward_method; # where to submit notifications
+
+###############################################################################
+### Configuraciones de Cuarentena
+###############################################################################
+
+# Directorio base de cuarentenas
+$QUARANTINEDIR = "$MYHOME/quarantine";
+
+# Agregar niveles de subdirectorios para esparcir la cuarentena
+# Mejor rendimiento que todos los archivos en un directorio.
+$quarantine_subdir_levels = 1;
+
+# Directorios de cuarentena separados para virus, spam, banned y badh dentro
+# del directorio $QUARANTINEDIR:
+$virus_quarantine_method          = 'local:virus/%m';
+$spam_quarantine_method           = 'local:spam/%m.gz';
+$banned_files_quarantine_method   = 'local:banned/%m';
+$bad_header_quarantine_method     = 'local:badh/%m';
+
+# Adonde enviar la cuarentena para virus, banned, badh y spam
+$virus_quarantine_to      = 'virus-quarantine';      # Cuarentena Local
+$banned_quarantine_to     = 'banned-quarantine';     # Cuarentena Local
+$bad_header_quarantine_to = 'bad-header-quarantine'; # Cuarentena Local
+$spam_quarantine_to       = 'spam-quarantine';       # Cuarentena Local
+
+###############################################################################
+### Configuraciones de Notificaciones
+###############################################################################
+
+# Definir sender (from:) de notificaciones de amavis
+$mailfrom_notify_admin	    = 'virusalert@example.com';
+# Default: "virusalert\@$mydomain"
+$mailfrom_notify_recip      = 'virusalert@example.com';
+# Default: "virusalert\@$mydomain"
+$mailfrom_notify_spamadmin  = 'spam.police@example.com';
+# Default: "spam.police\@$mydomain"
+
+# Recibir una copia de todas las DSN enviadas,
+# util para pruebas y monitoreo
+$dsn_bcc = 'mailadmin@example.com'; # Default: "mailadmin\@$mydomain";
+
+# Agregar la siguiente cabecera a todo correo analizado por amavisd-new
+$hdrfrom_notify_sender = "\"Content-filter at $mydomain\" <postmaster\@$mydomain>";
+
+#
+# Notificaciones para el filtro de archivos prohibidos
+#
+
+# Enviar Notificaciones de Correo con Archivos Banneados al admin:
+$banned_admin = 'postmaster@example.com';
+# Notificar al remitente si se detecto un archivo prohibido
+$warnbannedsender = 0;  
+# Notificar al recipiente local si se detecto un archivo prohibido
+$warnbannedrecip = 0;
+# Solo si $final_banned_destiny = D_DISCARD/D_BOUNCE
+# 1 = Si, 0 = No
+# Default = 0
+
+#
+# Notificaciones para el filtro de Cabeceras mal formadas
+#
+
+# Enviar Notificaciones de Correo con Bad Headers al admin:
+$bad_header_admin = 'postmaster@example.com';
+# Notificar al remitente si se detecto un mensaje con cabeceras mal formadas
+$warnbadhsender = 0;
+# Notificar al recipiente local si se detecto un mensaje con cabeceras mal formadas
+$warnbadhrecip = 0;
+# Solo si $final_bad_header_destiny = D_DISCARD/D_BOUNCE
+# 1 = Si, 0 = No
+# Default = 0
+
+#
+# Notificaciones para el filtro de SPAM
+#
+
+# Enviar Notificaciones de Correo con Spam al admin:
+$spam_admin = 'spamalert@example.com'; # Default: "spamalert\@$mydomain";
+# Notificar al remitente si se detecto un mensaje con SPAM
+$warnspamsender = 0;
+# Notificar al recipiente local si se detecto un mensaje con SPAM
+#$warnspamrecip = 0;
+# Solo si $final_spam_destiny = D_DISCARD/D_BOUNCE
+# 1 = Si, 0 = No
+# Default = 0
+
+#
+# Notificaciones para el filtro de VIRUS
+#
+
+# Enviar Notificaciones de Correo con Virus al admin:
+$virus_admin = 'postmaster@example.com'; # Default: "postmaster\@$mydomain";
+# Notificar al remitente si se detecto un mensaje con VIRUS
+$warnvirussender = 0;
+# Notificar al recipiente local si se detecto un mensaje con VIRUS
+$warnvirusrecip = 0;
+# Solo si $final_virus_destiny = D_DISCARD/D_BOUNCE
+# 1 = Si, 0 = No
+# Default = 0
+
+###############################################################################
+### Parametros de configuración para el Filtro de Archivos Prohibidos (Banned)
+###############################################################################
+
+# Accion predefinida para mensajes con archivos prohibidos
+$final_banned_destiny = D_DISCARD;  # (defaults to D_BOUNCE)
+
+# Filtro Archivos Prohibidos: Activado
+# Para desactivar, comente las dos lineas siguientes:
+@bypass_banned_checks_maps = (
+   \%bypass_banned_checks, \@bypass_banned_checks_acl, \$bypass_banned_checks_re);
+#bypass_banned_checks_maps => [1]
+
+# Lista de control de acceso para arcihvos peligrosos:
+# for $banned_namepath_re, a new-style of banned table, see amavisd.conf-sample
+
+$banned_filename_re = new_RE(
+
+  #
+  # Permitir el envio de adjuntos con la siguientes extensiones
+  [ qr'\.che$' => 0 ],
+
+  # Permitir archivos peligrosos dentro de zip protegidos por contraseña (indecifrables)
+  [ qr'^UNDECIPHERABLE$'=> 0 ],
+  # qr'^UNDECIPHERABLE$',  # is or contains any undecipherable components
+
+  # Bloquear archivos peligrosos con doble extensi0n
+  qr'\.[^./]*\.(exe|vbs|pif|scr|bat|cmd|com|cpl|dll)\.?$'i,
+
+  # Bloquear archivos Windows con Class ID CLSID, strict
+  qr'\{[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\}?$'i,
+
+  #
+  # Bloquear archivos por el tipo MIME
+  #
+  qr'^application/x-msdownload$'i,
+  qr'^application/x-msdos-program$'i,
+  qr'^application/hta$'i,
+  # qr'^application/x-msmetafile$'i,     		  # Windows Metafile MIME type
+  # qr'^\.wmf$',                          		  # Windows Metafile file(1) type
+  # qr'^message/partial$'i, qr'^message/external-body$'i, # rfc2046 MIME types
+
+  #
+  # Permitir en los archivos comprimidos
+  #
+  # [ qr'^\.(Z|gz|bz2)$'           => 0 ],  # allow any in Unix-compressed
+  # [ qr'^\.(rpm|cpio|tar)$'       => 0 ],  # allow any in Unix-type archives
+  # [ qr'^\.(zip|rar|arc|arj|zoo)$'=> 0 ],  # allow any within such archives
+  # [ qr'^application/x-zip-compressed$'i => 0],  # allow any within such archives
+
+  #
+  # Bloquear los archivos que terminan con la extension
+  #
+  qr'.\.(exe|vbs|pif|scr|bat|cmd|com|cpl)$'i, # banned extension - basic
+  # qr'.\.(ade|adp|app|bas|bat|chm|cmd|com|cpl|crt|emf|exe|fxp|grp|hlp|hta|
+  #        inf|ins|isp|js|jse|lnk|mda|mdb|mde|mdw|mdt|mdz|msc|msi|msp|mst|
+  #        ops|pcd|pif|prg|reg|scr|sct|shb|shs|vb|vbe|vbs|
+  #        wmf|wsc|wsf|wsh)$'ix,  # banned ext - long
+
+  # qr'.\.(mim|b64|bhx|hqx|xxe|uu|uue)$'i,  # banned extension - WinZip vulnerab.
+
+  qr'^\.(exe-ms)$',                       # banned file(1) types
+  # qr'^\.(exe|lha|tnef|cab|dll)$',         # banned file(1) types
+);
+# See http://support.microsoft.com/default.aspx?scid=kb;EN-US;q262631
+# and http://www.cknow.com/vtutor/vtextensions.htm
+
+###############################################################################
+### Parametros de configuración para el Filtro de Cabeceras Mal formadas
+###############################################################################
+
+# Accion predefinida para mensajes con cabeceras mal formadas
+$final_bad_header_destiny = D_PASS;    # (defaults to D_PASS)
+
+# Filtro Cabeceras mal formadas: Activado
+# Para desactivar, comente las dos lineas siguientes:
+@bypass_header_checks_maps = (
+   \%bypass_header_checks, \@bypass_header_checks_acl, \$bypass_header_checks_re);
+
+###############################################################################
+### Parametros de configuración para el Filtro de SPAM
+###############################################################################
+
+# Accion predefinida para mensajes con SPAM
+$final_spam_destiny = D_DISCARD; # (defaults to D_BOUNCE)
+
+# Filtro AntiSPAM: Activado
+# Para desactivar, comente las dos lineas siguientes:
+#@bypass_spam_checks_maps = (
+#   \%bypass_spam_checks, \@bypass_spam_checks_acl, \$bypass_spam_checks_re);
+
+# Agregar cabeceras X-Spam-Status y X-Spam-Level, cuando el puntaje
+# sea => -999, es decir, Siempre.
+$sa_tag_level_deflt  = -999;
+# Agregar cabecera 'X-Spam-Flag: YES' y modifica el Subject
+# de acuerdo a $sa_spam_subject_tag, cuando el puntaje
+# sea => 5.0
+$sa_tag2_level_deflt = 5.0;
+# Ejecuta accion evasiba antispam definida en politica:
+# $final_spam_destiny, cuando el puntaje sea => 6.0
+$sa_kill_level_deflt = 5.0;
+# No enviar DSN cuando el puntaje sea => 10
+$sa_dsn_cutoff_level = 10;
+
+# Si acción $final_spam_destiny=D_PASS, y sa_tag2_level_deflt => 5.0, modificar Subjetc
+$sa_spam_subject_tag = '***SPAM*** ';
+
+# Lista Blanca para filtro SPAM
+@whitelist_sender_maps = (
+  read_hash("/var/lib/amavis/whitelist_sender")
+);
+
+# Lista Negra para filtro SPAM
+@blacklist_sender_maps = (
+  read_hash("/var/lib/amavis/blacklist_sender")
+);
+
+# Lista Spam Lovers para filtro SPAM
+@spam_lovers_maps = (
+  read_hash("/var/lib/amavis/spam_lovers")
+);
+
+# Habilitando modo debug para SpamAssassin
+$sa_debug = 0;
+
+###############################################################################
+### Parametros de configuración para el Filtro de VIRUS
+###############################################################################
+
+# Accion predefinida para mensajes con VIRUS
+$final_virus_destiny = D_DISCARD; # (defaults to D_DISCARD)
+
+# Filtro AntiVirus: Activado
+# Para desactivar, comente las dos lineas siguientes:
+#@bypass_virus_checks_maps = (
+#   \%bypass_virus_checks, \@bypass_virus_checks_acl, \$bypass_virus_checks_re);
+
+# Extras para sanesecurity/
+@keep_decoded_original_maps = (new_RE(
+  qr'^MAIL$',   # retain full original message for virus checking (can be slow)
+  qr'^MAIL-UNDECIPHERABLE$', # recheck full mail if it contains undecipherables
+  qr'^(ASCII(?! cpio)|text|uuencoded|xxencoded|binhex)'i,
+# qr'^Zip archive data',     # don't trust Archive::Zip
+));
+
+@virus_name_to_spam_score_maps =
+  (new_RE(  # the order matters!
+    [ qr'^Phishing\.'                                             => 0.1 ],
+    [ qr'^(Email|HTML)\.Phishing\.(?!.*Sanesecurity)'             => 0.1 ],
+    [ qr'^Sanesecurity\.(Malware|Rogue|Trojan)\.' => undef ],# keep as infected
+    [ qr'^Sanesecurity(\.[^., ]*)*\.'                             => 0.1 ],
+    [ qr'^Sanesecurity_PhishBar_'                                 => 0   ],
+    [ qr'^Email\.Spam\.Bounce(\.[^., ]*)*\.Sanesecurity\.'        => 0   ],
+    [ qr'^(MSRBL-Images\b|MSRBL-SPAM\.)'                          => 0.1 ],
+    [ qr'^VX\.Honeypot-SecuriteInfo\.com\.Joke'                   => 0.1 ],
+    [ qr'^VX\.not-virus_(Hoax|Joke)\..*-SecuriteInfo\.com(\.|\z)' => 0.1 ],
+    [ qr'^Email\.Spam.*-SecuriteInfo\.com(\.|\z)'                 => 0.1 ],
+    [ qr'-SecuriteInfo\.com(\.|\z)'         => undef ],  # keep as infected
+    [ qr'^MBL_'                             => undef ],  # keep as infected
+  ));
+# Sanesecurity       http://www.sanesecurity.co.uk/
+# MSRBL-             http://www.msrbl.com/site/contact
+# MBL                http://www.malware.com.br/index.shtml
+# -SecuriteInfo.com  http://clamav.securiteinfo.com/malwares.html
+
+#------------ Do not modify anything below this line -------------
+1;  # ensure a defined return

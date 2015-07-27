@@ -1,0 +1,15 @@
+<VirtualHost *>
+        ServerAdmin webmaster@ejemplo.com
+        ServerName www.ejemplo.com
+        ServerAlias ejemplo.com
+        DocumentRoot /home/www/ejemplo.com/htdocs
+        ErrorLog /home/www/ejemplo.com/error_log
+        CustomLog /home/www/ejemplo.com/access_log combined
+        ScriptAlias /cgi-bin/ /home/www/ejemplo.com/htdocs/cgi-bin/
+        <Directory "/home/www/ejemplo.com/htdocs/">
+          Options Indexes FollowSymLinks ExecCGI
+          AllowOverride All
+          Order allow,deny
+          Allow from all
+       </Directory>
+</VirtualHost>

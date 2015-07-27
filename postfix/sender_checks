@@ -1,0 +1,45 @@
+##############################################################
+########### SENDER CHECKS ####################################
+##############################################################
+
+# Los sender checks revisan la dirección de correo ó dominio
+# (SMTP "MAIL FROM") en las cabeceras del correo, NO la direc-
+# ción IP o el nombre de host, o el campo "From:", (aunque puede
+# coincidir).
+# Las reglas solo aplican a direcciones de:
+# Correos: algunusuario@example.com
+# Dominio: otro-example.com
+
+#
+# Este archivo debe ser "compilado" con "postmap", ejem:
+# postmap hash:/etc/postfix/sender_checks
+#
+
+##############################################################
+################ Anti Domain Spoofing   ######################
+##############################################################
+
+# Con estas reglas prevenimos la falsificacion de nuestro dominio,
+# en especifico correo "de mi para mi"
+example.com	REJECT you cannot send on behalf of example.com
+.example.com	REJECT you cannot send on behalf of example.com
+
+##############################################################
+########### LISTAS NEGRAS / BLACKLISTS #######################
+##############################################################
+
+# fulano@spammer.net                    REJECT
+# dominiospammero.com                   REJECT
+#dominiospammer.com			REJECT
+
+# Agregar aquí correos o dominios deseamos bloquear y regresar
+# un mensaje de que fue rechazado por ser considerado
+# correo basura (SPAM)
+#sender@spammydomein.com			550 SPAM
+
+##############################################################
+########### LISTAS BLANCAS / WHITELISTS ######################
+##############################################################
+
+# Exclusiones de los RBL checks
+#clienteimportante.com			OK

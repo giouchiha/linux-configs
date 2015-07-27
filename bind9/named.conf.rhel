@@ -1,0 +1,117 @@
+// Archivo de configuración para el servidor DNS named
+
+// Configuraciones Globales del demonio
+options {
+	// Directorio principal del demonio named
+        directory "/var/named";
+	// Ruta al archivo que contiene el PID del proceso named
+        pid-file "/var/run/named.pid";
+	// Archivo donde se almacenan las estadisticas del comand rndc
+        statistics-file "/var/named/named.stats";
+        zone-statistics yes;
+        // El servidor named escuchará peticiones en las siguientes
+        // direcciones IP en el puerto 53 UDP
+        listen-on port 53 {
+		127.0.0.1;
+		192.168.1.1;
+	};
+        // Directorio Base de archivos de zonas y estadisticas
+        directory       "/var/named";
+        // Puerto que se utilizará para las consultas desde el
+        // servidor.
+        query-source    port 53;
+        // Permitir consultas DNS solo desde el localhost y
+        // desde la subred 192.168.1.0/24
+        allow-query {
+		localhost;
+		192.168.1.0/24;
+	 };
+};
+
+// Configuración de Registro de Eventos
+logging {
+
+        channel default_syslog {
+                // Send most of the named messages to syslog.
+                syslog local2;
+                severity debug;
+        };
+
+        channel audit_log {
+                // Send the security related messages to a separate file.
+                file "/var/log/bind/named.log";
+                severity debug;
+                print-time yes;
+        };
+
+        category default { default_syslog; };
+        category general { default_syslog; };
+        category security { audit_log; default_syslog; };
+        category config { default_syslog; };
+        category resolver { audit_log; };
+        category xfer-in { audit_log; };
+        category xfer-out { audit_log; };
+        category notify { audit_log; };
+        category client { audit_log; };
+        category network { audit_log; };
+        category update { audit_log; };
+        category queries { audit_log; };
+        category lame-servers { audit_log; };
+};
+
+//
+// Access Control Lists
+//
+
+// ACL para transferencias de zonas
+acl "xfer" {
+    none;
+};
+
+// ACL para la red local  y el localhost
+acl "redlocal" {
+        192.168.1.0/24;
+        localhost;
+};
+
+acl "esclavos" {
+        192.168.2.1;
+};
+
+//  Definicion de Zonas (Dominios)
+
+// Definición de zona para los servidores raíz
+zone "." IN {
+        type hint;
+        file "named.ca";
+};
+
+// Definición de zona Maestra para el localhost
+zone "localhost" IN {
+        type master;
+        file "localhost.zone";
+        allow-update { none; };
+};
+
+// Definición de zona Maestra para la resolución inversa
+// de 127.0.0.1
+zone "0.0.127.in-addr.arpa" IN {
+        type master;
+        file "named.local";
+        allow-update { none; };
+};
+
+// Definición de zona maestra para el dominio dominio.tld
+zone "dominio.tld" IN {
+        type master;
+        file "dominio.tld.zone";
+        allow-update { none; };
+	allow-transfer { esclavos; };
+};
+
+// Definición de zona esclava para el dominio curso2.com
+zone "otrodominio.tld" IN {
+        type slave;
+        file "slaves/db.otrodominio.tld.zone";
+        masters { 192.168.2.1; };
+};

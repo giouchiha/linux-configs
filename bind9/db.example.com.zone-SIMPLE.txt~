@@ -1,0 +1,47 @@
+; Definicion del tiempo de vida (TTL) Estandar, un día
+; Opción obligatoria en version bind 9.
+
+$TTL 86400      ; 1 día
+
+;
+; Entrada para registro SOA (Start of Authority)
+;
+example.com.     IN      SOA     ns1.example.com. hostmaster.example.com.  (
+                2008050906      ; Número de serie yyyy/mm/dd/id
+                10800           ; Tiempo de Refresco (3 horas)
+                3600            ; Tiempo de Reintento (1 hora)
+                604800          ; Tiempo de Expiracion (1 semana)
+                86400   )       ; Cache negativo TTL (1 dia)
+
+;
+; Entradas para los servidores de nombres para el dominio example.com.
+;
+example.com.     IN      NS      ns1.example.com.
+
+;
+; Registros para el manejador de correo de example.com
+;
+example.com.     IN      MX      10      mail.example.com.
+
+;
+; Entradas para asignacion de nombre a IP
+;
+
+; Dirección IP para la zona (dominio) example.com
+example.com.     IN      A       192.168.1.1
+
+; Dirección IP del Host ns1, usado en el registro SOA y NS
+ns1             IN      A       192.168.1.1
+
+; Direcciones IP de hosts de servicios básicos
+www             IN      A       192.168.1.1
+ftp             IN      A       192.168.1.1
+mail            IN      A       192.168.1.1
+
+; Dirección IP de servidores especiales
+hades		IN	A	192.168.1.20
+zeus		IN	A	192.168.1.30
+cronus		IN	A	192.168.1.40
+
+; Alias de Host
+root		IN      CNAME   zeus

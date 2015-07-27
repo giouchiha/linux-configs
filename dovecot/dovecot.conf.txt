@@ -1,0 +1,101 @@
+# dovecot -n
+# 1.1.11: /etc/dovecot/dovecot.conf
+# OS: Linux 2.6.31-22-generic-pae i686 Ubuntu 9.10 ext3
+log_timestamp: %Y-%m-%d %H:%M:%S 
+protocols: imap pop3 imaps pop3s managesieve
+ssl_ca_file: /etc/ssl/certs/ca.crt
+ssl_cert_file: /etc/ssl/certs/mail.example.com.crt
+ssl_key_file: /etc/ssl/private/mail.example.com.key
+ssl_cipher_list: ALL:!LOW:!SSLv2:ALL:!aNULL:!ADH:!eNULL:!EXP:RC4+RSA:+HIGH:+MEDIUM
+disable_plaintext_auth: no
+login_dir: /var/run/dovecot/login
+login_executable(default): /usr/lib/dovecot/imap-login
+login_executable(imap): /usr/lib/dovecot/imap-login
+login_executable(pop3): /usr/lib/dovecot/pop3-login
+login_executable(managesieve): /usr/lib/dovecot/managesieve-login
+login_greeting_capability(default): yes                                                                                                                     
+login_greeting_capability(imap): yes                                                                                                                        
+login_greeting_capability(pop3): no                                                                                                                         
+login_greeting_capability(managesieve): no                                                                                                                  
+mail_max_userip_connections(default): 40
+mail_max_userip_connections(imap): 40
+mail_max_userip_connections(pop3): 3
+mail_max_userip_connections(managesieve): 10
+first_valid_uid: 5000
+last_valid_uid: 5000
+first_valid_gid: 5000
+last_valid_gid: 5000
+mail_privileged_group: vmail
+mail_uid: 5000
+mail_gid: 5000
+mail_location: maildir:/var/vmail/dominios/%d/%n/Maildir
+mail_executable(default): /usr/lib/dovecot/imap
+mail_executable(imap): /usr/lib/dovecot/imap
+mail_executable(pop3): /usr/lib/dovecot/pop3
+mail_executable(managesieve): /usr/lib/dovecot/managesieve
+mail_plugins(default): autocreate trash quota imap_quota
+mail_plugins(imap): autocreate trash quota imap_quota
+mail_plugins(pop3): quota
+mail_plugins(managesieve): 
+mail_plugin_dir(default): /usr/lib/dovecot/modules/imap
+mail_plugin_dir(imap): /usr/lib/dovecot/modules/imap
+mail_plugin_dir(pop3): /usr/lib/dovecot/modules/pop3
+mail_plugin_dir(managesieve): /usr/lib/dovecot/modules/managesieve
+imap_client_workarounds(default): outlook-idle delay-newmail
+imap_client_workarounds(imap): outlook-idle delay-newmail
+imap_client_workarounds(pop3): 
+imap_client_workarounds(managesieve): 
+pop3_client_workarounds(default): 
+pop3_client_workarounds(imap): 
+pop3_client_workarounds(pop3): outlook-no-nuls oe-ns-eoh
+pop3_client_workarounds(managesieve): 
+sieve_storage(default): 
+sieve_storage(imap): 
+sieve_storage(pop3): 
+sieve_storage(managesieve): /var/vmail/dominios/%d/%n/sieve
+sieve(default): 
+sieve(imap): 
+sieve(pop3): 
+sieve(managesieve): /var/vmail/dominios/%d/%n/.dovecot.sieve
+auth default:
+  mechanisms: plain login
+  passdb:
+    driver: pam
+  passdb:
+    driver: sql
+    args: /etc/dovecot/dovecot-sql.conf
+  userdb:
+    driver: passwd
+  userdb:
+    driver: sql
+    args: /etc/dovecot/dovecot-sql.conf
+  socket:
+    type: listen
+    client:
+      path: /var/spool/postfix/private/dovecot-auth
+      mode: 432
+      user: postfix
+      group: postfix
+    master:
+      path: /var/run/dovecot/auth-master
+      mode: 384
+      user: vmail
+      group: vmail
+plugin:
+  autocreate: Sent
+  autocreate2: Trash
+  autocreate3: Drafts
+  autocreate4: Spam
+  autosubscribe: Sent
+  autosubscribe2: Trash
+  autosubscribe3: Drafts
+  autosubscribe4: Spam
+  quota: dict:::proxy::quotadict
+  trash: /etc/dovecot/dovecot-trash.conf
+  sieve: /var/vmail/dominios/%d/%n/.dovecot.sieve
+  sieve_dir: /var/vmail/dominios/%d/%n/sieve
+  home: /var/vmail/dominios/%d/%n/sieve
+  sieve_global_dir: /etc/sieve/
+  sieve_global_path: /etc/sieve/global
+dict:
+  quotadict: mysql:/etc/dovecot/dovecot-dict-quota.conf

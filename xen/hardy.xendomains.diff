@@ -1,0 +1,56 @@
+--- xendomains.orig	2009-01-29 12:57:45.000000000 -0600
++++ xendomains	2009-01-29 15:09:53.000000000 -0600
+@@ -63,7 +63,7 @@
+ 	echo_rc()
+ 	{
+ 	    #echo -n "  [${_SMSG[${_RC_RV}]}] "
+-	    if test ${_RC_RV} = 0; then
++	    if test "${_RC_RV}" = "0"; then
+ 		success "  [${_SMSG[${_RC_RV}]}] "
+ 	    else
+ 		failure "  [${_SMSG[${_RC_RV}]}] "
+@@ -80,7 +80,7 @@
+         else
+ 	  echo_rc()
+ 	  {
+-	    if test ${_RC_RV} = 0; then
++	    if test "${_RC_RV}" = "0"; then
+ 		log_success_msg "  [${_SMSG[${_RC_RV}]}] "
+ 	    else
+ 		log_failure_msg "  [${_SMSG[${_RC_RV}]}] "
+@@ -183,7 +183,7 @@
+ {
+     name=`echo "$1" | cut -d\  -f1`
+     name=${name%% *}
+-    rest=`echo "$1" | cut cut -d\  -f2-`
++    rest=`echo "$1" | cut -d\  -f2-`
+     read id mem cpu vcpu state tm < <(echo "$rest")
+ }
+ 
+@@ -193,7 +193,7 @@
+     RC=1
+     while read LN; do
+ 	parseln "$LN"
+-	if test $id = 0; then continue; fi
++	if test "$id" = "0"; then continue; fi
+ 	case $name in 
+ 	    ($NM)
+ 		RC=0
+@@ -268,7 +268,7 @@
+ {
+     while read LN; do
+ 	parseln "$LN"
+-	if test $id = 0; then continue; fi
++	if test "$id" = "0"; then continue; fi
+ 	if test "$state" != "-b---d" -a "$state" != "-----d"; then
+ 	    return 1;
+ 	fi
+@@ -310,7 +310,7 @@
+     echo -n "Shutting down Xen domains:"
+     while read LN; do
+ 	parseln "$LN"
+-	if test $id = 0; then continue; fi
++	if test "$id" = "0"; then continue; fi
+ 	echo -n " $name"
+ 	if test "$XENDOMAINS_AUTO_ONLY" = "true"; then
+ 	    case $name in

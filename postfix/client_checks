@@ -1,0 +1,40 @@
+##############################################################
+########### CLIENT CHECKS ####################################
+##############################################################
+
+# CLIENT se refiere a al dirección IP del servidor (MTA), o
+# el nombre de resolución inversa del servidor.
+
+#
+# Este archivo debe ser "compilado" con "postmap", ejem:
+# postmap hash:/etc/postfix/client_checks
+#
+
+##############################################################
+
+##############################################################
+########### LISTAS BLANCAS / WHITELISTS ######################
+##############################################################
+
+# Maybe example2.tld is on a DNSbl, but we want to let their
+# email in anyway.
+#example2.tld           OK
+
+##############################################################
+########### LISTAS NEGRAS / BLACKLISTS #######################
+##############################################################
+
+# Using a domain name
+#example.tld                    554 Spam not tolerated here
+
+
+# Checking by IP address
+# 10.0.0.0/8
+#10                             554 Go away!
+
+# 172.16/16
+#172.16                 554 Bugger off!
+
+# 192.168.4/24 is bad, but 192.168.4.128 is okay
+#192.168.4.128          OK
+#192.168.4                      554 Take a hike!

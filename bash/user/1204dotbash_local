@@ -1,0 +1,45 @@
+#
+# Archivo de configuracion personal para el shell bash.
+# Autor: Jorge Armando Medina (jmedina@tuxjm.net)
+
+# Habilitamos el autocompletado del shell
+if [ -f /etc/bash_completion ]; then
+   . /etc/bash_completion
+fi
+
+# Incluir aliases personales para el shell bash
+# del archivo ~/.bash_aliases.
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# Prompt coloreado (Debian default)
+#PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\# '
+
+# Mi Prompt de dos linesa y colores
+PS1='[\e[1;32m\u\e[m@\e[1;34m\H\e[m][\e[2;33m\w\e[m]\n$ '
+
+#
+# Opciones para el historial de comandos, para mas informacion ver bash(1).
+#
+
+# Archivo del historial
+export HISTFILE=~/.bash_history
+# Numero maximo de entradas en HISTFILE, si se llega al limite las entradas mas
+# antiguas son recicladas.
+export HISTFILESIZE=2000
+# Numero de entradas que el historial recordara
+export HISTSIZE=1000
+# No almacenar entradas duplicadas ni espacios en blanco
+export HISTCONTROL=ignoredups:ignorespace
+# Agregar un timestamp al historial en el formato: Aug-02 - 11:46:16
+export HISTTIMEFORMAT="%h-%d - %H:%M:%S "
+# Anexar al final del archivo history, no sobre escribirlo.
+shopt -s histappend
+
+# Variables para el editor de textos predeterminado:
+export EDITOR=vim
+export VISUAL=$EDITOR
+
+# Color resaltado grep a verde:
+export GREP_COLOR='1;32'

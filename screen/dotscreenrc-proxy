@@ -1,0 +1,19 @@
+#
+# Config personal GNU/screen
+#
+hardstatus on 
+hardstatus alwayslastline 
+startup_message off 
+termcapinfo xterm ti@:te@ 
+hardstatus string "%{= kG}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+
+shell -$SHELL
+
+screen -t bash1 0 htop
+screen -t bash1 1 
+screen -t bash2 2 
+screen -t bash3 3 
+screen -t squidclogs 4 multitail -cS squid -i /var/log/squid3/cache.log 
+screen -t squidalogs 5 multitail -cS squid -i /var/log/squid3/access.log
+screen -t sgplogs 6 multitail -cS squid -i /var/log/squid3/squidGuard.log
+screen -t sgblogs 7 multitail -cS squid -i /var/log/squid3/blocked.log

@@ -1,0 +1,26 @@
+##############################################################
+########### RECIPIENT CHECKS #################################
+##############################################################
+
+# El "Recipiente" se refiere a la dirección de coreo en las
+# cabeceras del correo (SMTP RCPT TO), no el "To:", "Cc:"
+# u otros campos.
+
+# Los Recipientes son revisados por smtpd recipient restrictions
+
+# NOTA: Debes tener soporte PCRE compilado/modulo en Postfix
+# En Debian/Ubuntu install postfix-pcre
+
+# Este archivo no requiere ser compilado con postmap.
+
+# Rechazar direcciones de recipiente invalidas
+/^\@/           550 Invalid address format.
+/[!%\@].*\@/    550 This server disallows weird address syntax.
+
+# IMPORTANTE: Nunca debemos rechazar o descartar correos para las
+# cuentas de postmaster hostmaster y abuse.
+# Ver el RFC 2142 MAILBOX NAMES FOR COMMON SERVICES, ROLES AND FUNCTIONS.
+# De otra forma podrías ser lista en listas negras como rfc-ignorant.org.
+/^postmaster\@/ OK
+/^hostmaster\@/ OK
+/^abuse\@/      OK

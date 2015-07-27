@@ -1,0 +1,30 @@
+# Path to the mailboxes
+VHOME="/home/vmail/dominios"
+## Extrae solo el username de username@dominio.tld
+ACCOUNT=`echo "$LOGNAME" | cut -d@ -f1`
+## Extrae solo el dominio.tld de username@dominio.tld
+USERDOMAIN=`echo "$LOGNAME" | cut -d@ -f2`
+## Log everything to this file
+logfile "$VHOME/$USERDOMAIN/$ACCOUNT/maildrop.log"
+
+#log "RECIPIENT = $LOGNAME"
+
+
+if (/^X-Spam-Flag: YES/)
+{
+log "Moving Spamassassin tagged mails to the SPAM Folder"
+log "into $LOGNAME Mailbox."
+
+  if( test -d $VHOME/$USERDOMAIN/$ACCOUNT/.Spam )
+    {
+      `maildirmake -f Spam $VHOME/$USERDOMAIN/$ACCOUNT`
+      `echo INBOX.Spam >> $VHOME/$USERDOMAIN/$ACCOUNT/courierimapsubscribed`
+    }
+
+  exception {
+    #to "$VHOME/$USERDOMAIN/$ACCOUNT/.Spam"
+    to $DEFAULT.Spam/
+    #to $DEFAULT.Trash/
+  }
+
+}

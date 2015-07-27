@@ -1,0 +1,57 @@
+;
+; BIND data file for zone example.com
+;
+
+;
+;ChangeLog
+;
+
+;
+; Definition of a standard time to live
+;
+$TTL 86400      ; 1 day
+
+;
+; SOA Entry
+;
+@		IN	SOA	ns1.example.com.	hostmaster.example.com.	(
+		2007120201	; Serial yyyy/mm/dd/id
+		10800		; Refresh (3 hours)
+		3600		; Retry (1 hour)
+		604800		; Expire (1 week)
+		86400 )		; Negative Cache TTL (1 day)
+
+;
+; Entry(s) for the NS servers
+;
+		IN	NS	ns1.example.com.
+		IN	NS	ns2.example.com.
+
+;
+; The Mail Exchanger (MX) entry
+;
+		IN	MX	10	mail.example.com.
+
+;
+; SPF Record
+;			TXT	"v=spf1 ip4:xxx.xxx.xxx.xxx/32 -all"
+
+;example.com.	IN	TXT	"Domain Site"
+;example.com.	IN	HINFO	"XEON" "Slackware Linux"
+
+;
+; Allocation of IP address to host names
+;
+
+localhost.example.com.	IN	A	127.0.0.1
+example.com.	IN	A	xxx.xxx.xxx.xxx	
+
+ns1		IN	A	xxx.xxx.xxx.xxx	
+ns2		IN	A	yyy.yyy.yyy.yyy
+
+;			TXT	"example.com secondary nameserver"
+;			HINFO	"AMD Athlon" "Redhat Linux"
+
+www		IN	A	xxx.xxx.xxx.xxx
+mail		IN	A	xxx.xxx.xxx.xxx
+ftp		IN	A	xxx.xxx.xxx.xxx

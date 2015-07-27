@@ -1,0 +1,59 @@
+# dhcpd.conf                                                                                                                                         
+#                                                                                                                                                    
+# Configuration file for ISC dhcpd (see 'man dhcpd.conf')                                                                                            
+#                                                                                                                                                    
+                                                                                                                                                     
+###############################################################################                                                                      
+######################## DIRECTIVAS GLOBALES ##################################
+###############################################################################
+
+# -----------------------------------------------------------------------------
+# Directivas para servidor Autoritativo y DDNS
+# -----------------------------------------------------------------------------
+
+# Este es un servidor autoritativo y tiene prioridad en la subred
+authoritative;
+
+# El servidor rechaza actualizaciones DNS directamente desde los clientes
+deny client-updates;
+# El servidor NO usa ningun estilo de actualizacion DNS dinamica
+ddns-update-style none;
+
+################################################################################
+##################### DEFINICION DE SUBRED y HOSTS #############################
+################################################################################
+
+
+# -----------------------------------------------------------------------------
+# Definición de Subred 192.168.X.0/24
+# -----------------------------------------------------------------------------
+
+subnet 192.168.X.0 netmask 255.255.255.0 {
+
+        # Tiempos de asignacion para los clientes en esta subred
+        default-lease-time		28800;				# 8 Horas
+        max-lease-time			43200;				# 12 Horas
+
+        # Parametros Generales de Red
+        option subnet-mask              255.255.255.0;
+        option broadcast-address        192.168.X.255;
+        option routers                  192.168.X.254;
+        option domain-name              "example.com";
+        option domain-name-servers      192.168.X.254;
+
+        option time-offset              -6;				# Central Standard Time
+
+        range				192.168.X.50 192.168.X.200;
+
+}
+
+# -----------------------------------------------------------------------------
+# Asignación de direccion IP fija basada en la dirección MAC del cliente
+# -----------------------------------------------------------------------------
+
+# Host: ZEUZ
+#host zeus {
+#       option host-name "zeus.example.com";
+#       hardware ethernet 00:1E:4b:F8:68:72;
+#       fixed-address 192.168.X.30;
+#       }

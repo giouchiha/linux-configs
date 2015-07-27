@@ -1,0 +1,11 @@
+--- xen-create-image.orig	2009-02-07 05:23:16.000000000 -0600
++++ xen-create-image	2009-02-07 05:24:22.000000000 -0600
+@@ -2408,7 +2408,7 @@
+         #
+         # Save the image path to the partitions array
+         #
+-        $partition->{'imagetype'} = 'file:';
++        $partition->{'imagetype'} = 'tap:aio:';
+         $partition->{'image'}     = $disk;
+ 
+         #

@@ -1,0 +1,33 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+###################################
+### Interfaces Ethernet Fisicas ###
+###################################
+
+# Interfaz Fisica LAN
+auto eth0
+iface eth0 inet manual
+
+###################################
+###### Interfaces Bridge ##########
+###################################
+
+# Bridge LAN
+auto lanbr01
+iface lanbr01 inet static
+  address 192.168.1.10
+  netmask 255.255.255.0
+  gateway 192.168.1.254
+  dns-search example.com
+  dns-nameservers 192.168.1.254
+  bridge_fd 9
+  bridge_hello 2
+  bridge_maxage 12
+  bridge_maxwait 0
+  bridge_ports eth0
+  bridge_stp off

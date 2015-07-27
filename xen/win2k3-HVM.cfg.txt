@@ -1,0 +1,84 @@
+# Nombre del DomU: Windows 2003 Web Edition XXXX
+name =          'win2k3-001'
+
+# Parametros para Kernel y builder
+kernel =        '/usr/lib/xen/boot/hvmloader'
+builder =       'hvm'
+
+# CPU Asignados
+vcpus =         '1'
+
+# Necesario para no tener time latency con valores negativos, Bug #895
+timer_mode =    '1'
+#localtime =    '1'
+
+# Memoria RAM Asignada al DomU
+memory =        '2048'
+
+# Modelo de dispositivos para Full-Virt deben ser qemu-dm
+device_model =  '/usr/lib/xen/bin/qemu-dm'
+
+# Soporte ACPI Y APIC para DomU
+acpi =          '1'
+apic =          '1'
+
+
+# Dispositivos de almacenamiento y opticos
+# Disco Duro LVM y CD ISO (IOEMU)
+#NOTA: Montar iso con:
+# losetup -r /dev/loop1 /ISOs/Win2003-ES.iso
+disk = [
+        'phy:/dev/loop1,ioemu:hdc:cdrom,r',
+        'phy:/dev/VGXen01/win2k3-001-discoc,hda,w'
+       ]
+
+# Parametros de de RED
+# FULL VIRTUALIZATION
+vif =          [ 'type=ioemu, mac=00:16:3e:5e:76:50, bridge=eth0' ]
+# DRIVERS PARAVIRTUALIZADOS
+#vif =           [ 'mac=00:16:3e:5e:76:50, bridge=eth0' ]
+#vif =          ['']
+
+# Opciones de Booteo para Windows
+# Disco C: /dev/VGXen01/win2k3-001-discoc
+# DIsco D: /dev/loop1 (CD-ROM ISO)
+# Trata de arrancar primero el CD y luego el Disco duro
+boot =          'dc'
+
+# No cargar soporte para Graficos Locales (es un servidor)
+# Para el instalador se usara VNC
+sdl =           '0'
+
+# Habilitando soporte VNC Para el DomU
+vnc =           '1'
+# No lanzar vncviewer localmente ya que no hay Xs
+vncviewer =     '0'
+# Escuchar peticiones en cuaqluier IP en el Dom0
+vnclisten =     '0.0.0.0'
+# Contrasenia de VNC para el DomU
+vncpasswd =     '123456'
+# Lanzar VNC Console
+vncconsole =    '0'
+
+# Soporte para USB y mejor soporte emulacion mouse USB
+usb =           '1'
+usbdevice =     'tablet'
+
+#----------------------------------------------------------------------------
+# no graphics, use serial port
+#nographic =    '0'
+#serial =       'pty'
+#     start in full screen
+#full-screen=1
+#stdvga =       '0'
+
+#
+# Respuesta a comandos xm para los eventos de
+# EVENTO                Comando XM
+# Crash =               restart
+# Reiniciar =           restart
+# Apagado en seco =     destroy
+#
+on_poweroff =   'destroy'
+on_reboot =     'restart'
+on_crash =      'restart'

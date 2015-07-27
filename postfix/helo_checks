@@ -1,0 +1,30 @@
+##############################################################
+########### HELO CHECKS ######################################
+##############################################################
+
+# HELO se refiere al campo HELO/EHLO  cabeceras del correo,
+# En especifico es el nombre con el que se nos anuncian
+# los servidores remotos (Clientes MTA).
+# Son facilmente falcificados (spoofed) por Spammers.
+
+#
+# Este archivo debe ser "compilado" con "postmap", ejem:
+# postmap hash:/etc/postfix/helo_checks
+#
+
+##############################################################
+
+# Rechazar a cualquiera que se anuncie con nuestro propio
+# nombre de dominio(s).
+# Las maquinas en nuestras redes ($mynetworks) se saltarán
+# estos filtros (permit_my_networks)
+
+example.com		REJECT You are not in example.com
+
+# Rechazar a cualquiera que se nos anuncie con nuestra
+# propia dirección IP.
+xxx.xxx.xxx.xxx		REJECT You are not xxx.xxx.xxx.xxx
+
+# Rechazar a cualquiera que se nos anuncie con el:
+# localhost, imposible, yo soy "localhost"
+localhost               REJECT You are not me

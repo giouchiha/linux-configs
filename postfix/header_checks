@@ -1,0 +1,2 @@
+/^Received: from (.* \([-._[:alnum:]]+ \[[.[:digit:]]{7,15}\]\)).*\(Authenticated sender: ([^)]+)\).*by (mail\.example\.com) \(([^)]+)\) with (E?SMTPS?A?) id ([A-F[:digit:]]+).*/  REPLACE Received: from [127.0.0.1] (localhost [127.0.0.1]) by Authenticated User (mail.example.com) with $5 id $6
+

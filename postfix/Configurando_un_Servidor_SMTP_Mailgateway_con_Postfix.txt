@@ -1,0 +1,242 @@
+
+
+==Instalación de software==
+
+# apt-get install mailx mutt postfix postfix-ldap postfix-pcre pfqueue
+
+En el asistente seleccionar Internet Site y usar los parametros predeterminados.
+
+==Configuración de main.cf==
+
+- Respaldamos archivo original:
+
+# mv /etc/postfix/main.cf{,.orig}
+
+- Creamos nuevo archivo de configuración main.cf en base a la plantilla:
+
+PLANTILLA: http://tuxjm.net/jm-confs/postfix/main.cf-mailgateway.txt
+
+# vim /etc/postfix/main.cf
+
+- Definir Banner SMTP:
+
+# Banner SMTP con el que se anunca el servidor
+smtpd_banner = $myhostname ESMTP
+
+- Definir delimitador para extensiones de dirección de correo
+
+# Delimitador para extensiones de nombres de correo
+recipient_delimiter = +
+
+- Definir limite de mensajes
+
+message_size_limit = 25971520
+
+- Definir Alias de correo para root:
+
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+# vim /etc/aliases
+
+root: eladmin@example.com
+
+# postalias /etc/aliases
+
+- Definir nombre de host y dominio:
+
+myhostname = smtp.example.com
+myorigin = example.com
+mydestination =
+
+- Definir interfaces de red y redes de confianza:
+
+inet_interfaces = all
+mynetworks = 127.0.0.0/8
+
+- Desactivar transporte local:
+
+local_transport = error:local mail delivery is disabled
+
+- Definir mapa de transportes (rutas) y dominios de relay:
+
+transport_maps = hash:/etc/postfix/transport
+relay_domains = $transport_maps
+
+- Habilitar restricciones para sesiones SMTP:
+
+smtpd_helo_required = yes
+disable_vrfy_command = yes
+smtpd_recipient_restrictions =
+        permit_mynetworks,
+        permit_sasl_authenticated,
+        reject_invalid_hostname,
+        reject_non_fqdn_hostname,
+        reject_non_fqdn_sender,
+        reject_non_fqdn_recipient,
+        reject_unknown_sender_domain,
+        reject_unknown_recipient_domain,
+        reject_unauth_destination,
+        check_recipient_access pcre:/etc/postfix/recipient_checks.pcre,
+        check_helo_access hash:/etc/postfix/helo_checks,
+        check_sender_access hash:/etc/postfix/sender_checks,
+        check_client_access hash:/etc/postfix/client_checks,
+        reject_rbl_client cbl.abuseat.org,
+        #reject_rbl_client bl.spamcop.com,
+        #check_policy_service inet:127.0.0.1:10001
+        permit
+
+smtpd_data_restrictions =
+	reject_unauth_pipelining,
+	permit
+
+- Creamos archivo de mapa virtual para postmaster y abuse:
+
+# vim /etc/postfix/virtual
+postmaster      postmaster@example.com
+abuse           abuse@example.com
+root		sysadmin@example.com
+
+Compilamos el mapa virtual:
+
+# postmap /etc/postfix/virtual
+
+- Crear mapa para control de acceso de recipientes:
+
+PLANTILLA: http://tuxjm.net/jm-confs/postfix/recipient_checks.pcre
+
+# vim /etc/postfix/recipient_checks.pcre
+
+Este mapa NO requiere convertirlo a .db, ya que usa PCRE.
+
+- Crear mapa para control de acceso HELO:
+
+PLANTILLA: http://tuxjm.net/jm-confs/postfix/helo_checks
+
+# vim /etc/postfix/helo_checks
+
+IMPORTANTE: Cambiar dominio y dirección IP
+
+- Generar mapa .db:
+
+# postmap /etc/postfix/helo_checks
+
+- Crear mapa para control de acceso sender:
+
+# vim /etc/postfix/sender_checks
+
+PLANTILLA: http://tuxjm.net/jm-confs/postfix/sender_checks
+
+IMPORTANTE: Cambiar dominio
+
+- Generar mapa .db:
+
+# postmap /etc/postfix/sender_checks
+
+- Crear mapa para control de acceso client:
+
+# vim /etc/postfix/client_checks
+
+PLANTILLA: http://tuxjm.net/jm-confs/postfix/client_checks
+
+NOTA: No modificar nada por ahora.
+
+- Generar mapa .db:
+
+# postmap /etc/postfix/client_checks
+
+- Crear mapa de transportes y rutas SMTP:
+
+# vim /etc/postfix/transport
+
+PLANTILLA: http://tuxjm.net/jm-confs/postfix/transport
+
+IMPORTANTE: Cambiar nombre de dominio y nombre/host del servidor de buzones.
+
+- Generar mapa .db:
+
+# postmap /etc/postfix/transport
+
+- Verificar rutas:
+
+# postmap -q example.com hash://etc/postfix/transport
+smtp:[pop.example.com]
+
+===Configuracion de relay recipient maps===
+
+# RELAY DOMAINS MAPS
+relay_domains = $transport_maps
+
+# Mapeo de recipientes relay
+relay_recipient_maps = TODO
+
+- Definir transportes para amavis:
+
+# cp /etc/postfix/master.cf{,.orig}
+
+# vim /etc/postfix/master.cf
+
+# Se desactiva el servicio local ya que es un server solo relay
+#local     unix  -       n       n       -       -       local
+
+
+...
+....
+# Configuraciones para Amavisd-new
+smtp-amavis unix -      -       n     -       4  smtp
+    -o smtp_data_done_timeout=1200
+    -o smtp_send_xforward_command=yes
+    -o disable_dns_lookups=yes
+    -o max_use=40
+
+127.0.0.1:10025 inet n  -       n     -       -  smtpd
+    -o content_filter=
+    -o local_recipient_maps=
+    -o relay_recipient_maps=
+    -o smtpd_restriction_classes=
+    -o smtpd_delay_reject=no
+    -o smtpd_client_restrictions=permit_mynetworks,reject
+    -o smtpd_helo_restrictions=
+    -o smtpd_sender_restrictions=
+    -o smtpd_recipient_restrictions=permit_mynetworks,reject
+    -o smtpd_data_restrictions=reject_unauth_pipelining
+    -o smtpd_end_of_data_restrictions=
+    -o mynetworks=127.0.0.0/8
+    -o smtpd_error_sleep_time=0
+    -o smtpd_soft_error_limit=1001
+    -o smtpd_hard_error_limit=1000
+    -o smtpd_client_connection_count_limit=0
+    -o smtpd_client_connection_rate_limit=0
+    -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks
+
+- Checar config:
+
+# postfix check
+
+- Reiniciar Postfix:
+
+# invoke-rc.d postfix restart
+
+===Configuración de Graficas con Mailgraph===
+
+# aptitude install apache2 mailgraph
+
+# vim /etc/default/mailgraph
+
+URL: http://host/cgi-bin/mailgraph.cgi
+
+Referencias:
+
+http://mailgraph.schweikert.ch/pub/
+
+http://www.howtoforge.com/mail_statistics_mailgraph_pflogsumm
+
+==Instalar servidor DNS esclavo==
+
+Instalar un servidor DNS esclavo para tener cache de consultas DNS.
+
+==Referencias==
+
+Postfix email firewall/gateway:
+http://www.postfix.org/STANDARD_CONFIGURATION_README.html#firewall
+
